@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile</title>
+</head>
+<body>
+  <h1>Your Profile</h1>
+
+  <div id="profileData" style="display:none;">
+    <p><strong>Username:</strong> <span id="pUsername"></span></p>
+    <p><strong>Email:</strong> <span id="pEmail"></span></p>
+    <p><strong>Account Created:</strong> <span id="pCreatedAt"></span></p>
+    <p><strong>Logged In:</strong> <span id="pLoggedIn"></span></p>
+  </div>
+
+  <p id="profileMsg"></p>
+
+  <button id="signOutBtn">Sign Out</button>
+  <p><a href="index.html">Back to Login</a></p>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const auth = new UserAuth();
+
+    // Guard: if no user is logged in, redirect to login
+    document.addEventListener("DOMContentLoaded", async () => {
+      const res = await auth.getProfile();
+
+      if (!res.ok || !res.data || res.data.loggedIn !== 1) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      document.getElementById("pUsername").textContent = res.data.username;
+      document.getElementById("pEmail").textContent = res.data.email;
+      document.getElementById("pCreatedAt").textContent = res.data.createdAt;
+      document.getElementById("pLoggedIn").textContent = res.data.loggedIn === 1 ? "true" : "false";
+
+      document.getElementById("profileData").style.display = "block";
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", async () => {
+      const out = await auth.logout();
+      if (out.ok) window.location.href = "index.html";
+      else document.getElementById("profileMsg").textContent = "Sign out failed.";
+    });
+  </script>
+</body>
+</html>

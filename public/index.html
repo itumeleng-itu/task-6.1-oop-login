@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+</head>
+<body>
+  <h1>Sign In</h1>
+
+  <form id="loginForm">
+    <label>
+      Username:
+      <input type="text" id="loginUsername" required />
+    </label>
+    <br />
+    <label>
+      Password:
+      <input type="password" id="loginPassword" required />
+    </label>
+    <br />
+    <button type="submit">Sign In</button>
+  </form>
+
+  <p id="loginMsg"></p>
+
+  <p>
+    Don't have an account?
+    <a href="signup.html">Go to Sign Up</a>
+  </p>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const auth = new UserAuth();
+
+    // Redirect if someone is already logged in
+    document.addEventListener("DOMContentLoaded", async () => {
+      const res = await auth.getProfile();
+      if (res.ok) window.location.href = "profile.html";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      const result = await auth.login(username, password);
+
+      if (result.ok) {
+        window.location.href = "profile.html";
+      } else {
+        document.getElementById("loginMsg").textContent =
+          result.message || "Login failed. Check your credentials.";
+      }
+    });
+  </script>
+</body>
+</html>
