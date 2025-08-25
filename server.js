@@ -5,14 +5,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Database setup
 const db = new sqlite3.Database('users.db');
 
-// Create users table if it doesn't exist
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,8 +21,7 @@ db.serialize(() => {
   )`);
 });
 
-// Login: set this user loggedIn = 1, set all others to 0
-app.post("/api/login", (req, res) => {
+app.post("/api/login", (req, res) => { 
   const { username, password } = req.body;
 
   const findSql = `SELECT * FROM users WHERE username = ? AND password = ? LIMIT 1`;
@@ -46,7 +42,6 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-// Logout: log out the user who is currently logged in
 app.post("/api/logout", (req, res) => {
   const sql = `UPDATE users SET loggedIn = 0 WHERE loggedIn = 1`;
   db.run(sql, [], function (err) {
@@ -55,7 +50,6 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-// Profile: return the currently logged-in user
 app.get("/api/profile", (req, res) => {
   const sql = `SELECT username, email, createdAt, loggedIn FROM users WHERE loggedIn = 1 LIMIT 1`;
   db.get(sql, [], (err, row) => {
@@ -65,14 +59,12 @@ app.get("/api/profile", (req, res) => {
   });
 });
 
-// Signup: create a new user
 app.post("/api/signup", (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
     return res.json({ ok: false, message: "Missing fields" });
   }
 
-  // Check if username or email already exists
   db.get(
     `SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1`,
     [username, email],
@@ -80,7 +72,6 @@ app.post("/api/signup", (req, res) => {
       if (err) return res.status(500).json({ ok: false, error: "DB read failed" });
       if (row) return res.json({ ok: false, message: "Username or email already exists" });
 
-      // Insert new user
       const createdAt = new Date().toISOString();
       db.run(
         `INSERT INTO users (username, email, password, createdAt, loggedIn) VALUES (?, ?, ?, ?, 0)`,
@@ -94,7 +85,6 @@ app.post("/api/signup", (req, res) => {
   );
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
